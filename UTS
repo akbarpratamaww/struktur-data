@@ -1,0 +1,217 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_CIRCLE_SIZE 20
+
+typedef struct Node {
+    char nama[50];
+    char jeniskelamin;
+    struct Node* next;
+} Node;
+
+Node* createNode(char* nama, char jeniskelamin) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    strcpy(newNode->nama, nama);
+    newNode->jeniskelamin = jeniskelamin;
+    newNode->next = NULL;
+    return newNode;
+}
+
+void menambahkankelingkaran(Node** head, char* nama, char jeniskelamin, int* size) {
+    if (*size >= MAX_CIRCLE_SIZE) {
+        printf("lingkaran sudah penuh!\n");
+        return;
+    }
+
+    Node* newNode = createNode(nama, jeniskelamin);
+    if (*head == NULL) {
+        *head = newNode;
+        newNode->next = *head;
+    } else {
+        Node* cur = *head;
+        while (cur->next != *head) {
+            cur = cur->next;
+        }
+        cur->next = newNode;
+        newNode->next = *head;
+    }
+    (*size)++;
+    printf("%s ditambahkan ke dalam lingkaran.\n", nama);
+}
+
+void menghapusdarilingkaran(Node** head, char* nama, int* size) {
+    if (*head == NULL) {
+        printf("lingkaran kosong!\n");
+        return;
+    }
+
+    Node* cur = *head;
+    Node* prev = NULL;
+
+    if (strcmp(cur->nama, nama) == 0) {
+        if (cur->next == *head) {
+            free(cur);
+            *head = NULL;
+        } else {
+            while (cur->next != *head) {
+                cur = cur->next;
+            }
+            Node* toDelete = *head;
+            cur->next = (*head)->next;
+            *head = (*head)->next;
+            free(toDelete);
+        }
+        (*size)--;
+        printf("%s keluar dari lingkaran.\n", nama);
+        return;
+    }
+
+    cur = *head;
+    while (cur->next != *head && strcmp(cur->nama, nama) != 0) {
+        prev = cur;
+        cur = cur->next;
+    }
+
+    if (strcmp(cur->nama, nama) == 0) {
+        prev->next = cur->next;
+        free(cur);
+        (*size)--;
+        printf("%s keluar dari lingkaran.\n", nama);
+    } else {
+        printf("%s tidak ditemukan dalam lingkaran.\n", nama);
+    }
+}
+
+void menampilkanlingkaran(Node* head) {
+    if (head == NULL) {
+        printf("lingkaran kosong.\n");
+        return;
+    }
+    Node* cur = head;
+    do {
+        printf("%s (%c) -> ", cur->nama, cur->jeniskelamin);
+        cur = cur->next;
+    } while (cur != head);
+    printf("kembali ke %s\n", head->nama);
+}
+
+void menampilkanLingkaranBesar(Node* Lingkaranlaki, Node* Lingkaranperempuan) {
+    if (Lingkaranlaki == NULL && Lingkaranperempuan == NULL) {
+        printf("Tidak ada yang berada dalam lingkaran besar.\n");
+        return;
+    }
+
+    Node* cur;
+
+    if (Lingkaranlaki != NULL) {
+        cur = Lingkaranlaki;
+        do {
+            printf("%s (%c) -> ", cur->nama, cur->jeniskelamin);
+            cur = cur->next;
+        } while (cur != Lingkaranlaki);
+    }
+
+    if (Lingkaranperempuan != NULL) {
+        cur = Lingkaranperempuan;
+        do {
+            printf("%s (%c) -> ", cur->nama, cur->jeniskelamin);
+            cur = cur->next;
+        } while (cur != Lingkaranperempuan);
+    }
+
+    if (Lingkaranlaki != NULL) {
+        printf("kembali ke %s\n", Lingkaranlaki->nama);
+    } else {
+        printf("kembali ke %s\n", Lingkaranperempuan->nama);
+    }
+}
+
+int main() {
+    Node* Lingkaranlaki = NULL;
+    Node* Lingkaranperempuan = NULL;
+
+    int sizeLaki = 0, sizePerempuan = 0;
+    int pilihan;
+    char nama[50];
+    char jeniskelamin;
+
+    printf("Acara Api Unggun\n");
+
+    while (1) {
+        printf("\nsilahkan pilih salah satu dibawah ini:\n");
+        printf("1. tambahkan mahasiswa/i ke lingkaran\n");
+        printf("2. hapus mahasiswa/i dari lingkaran\n");
+        printf("3. tampilkan lingkaran mahasiswa\n");
+        printf("4. tampilkan lingkaran mahasiswi\n");
+        printf("5. tampilkan lingkaran besar\n");
+        printf("6. keluar\n");
+        printf("pilihan: ");
+        scanf("%d", &pilihan);
+
+        switch (pilihan) {
+            case 1:
+                printf("masukkan nama: ");
+                scanf("%s", nama);
+                printf("masukkan jenis kelamin (L/P): ");
+                scanf(" %c", &jeniskelamin);
+
+                if (strcmp(nama, "Irsyad") == 0 || strcmp(nama, "Arsyad") == 0) {
+                    printf("menambahkan Irsyad dan Arsyad ke lingkaran laki-laki\n");
+                    menambahkankelingkaran(&Lingkaranlaki, "Irsyad", 'L', &sizeLaki);
+                    menambahkankelingkaran(&Lingkaranlaki, "Arsyad", 'L', &sizeLaki);
+                } else if (strcmp(nama, "Cindy") == 0) {
+                    if (jeniskelamin == 'P') {
+                        menambahkankelingkaran(&Lingkaranperempuan, nama, jeniskelamin, &sizePerempuan);
+                    } else {
+                        printf("cindy hanya ingin bergandengan dengan mahasiswi.\n");
+                    }
+                } else {
+                    if (jeniskelamin == 'L') {
+                        menambahkankelingkaran(&Lingkaranlaki, nama, jeniskelamin, &sizeLaki);
+                    } else {
+                        menambahkankelingkaran(&Lingkaranperempuan, nama, jeniskelamin, &sizePerempuan);
+                    }
+                }
+                break;
+            case 2:
+                printf("masukkan nama yang ingin dihapus: ");
+                scanf("%s", nama);
+
+                printf("masukkan jenis kelamin (L/P): ");
+                scanf(" %c", &jeniskelamin);
+
+                if (strcmp(nama, "Irsyad") == 0 || strcmp(nama, "Arsyad") == 0) {
+                    printf("menghapus Irsyad dan Arsyad dari lingkaran laki-laki\n");
+                    menghapusdarilingkaran(&Lingkaranlaki, "Irsyad", &sizeLaki);
+                    menghapusdarilingkaran(&Lingkaranlaki, "Arsyad", &sizeLaki);
+                } else {
+                    if (jeniskelamin == 'L') {
+                        menghapusdarilingkaran(&Lingkaranlaki, nama, &sizeLaki);
+                    } else {
+                        menghapusdarilingkaran(&Lingkaranperempuan, nama, &sizePerempuan);
+                    }
+                }
+                break;
+            case 3:
+                printf("lingkaran Mahasiswa:\n");
+                menampilkanlingkaran(Lingkaranlaki);
+                break;
+            case 4:
+                printf("lingkaran Mahasiswi:\n");
+                menampilkanlingkaran(Lingkaranperempuan);
+                break;
+            case 5:
+                printf("lingkaran besar:\n");
+                menampilkanLingkaranBesar(Lingkaranlaki, Lingkaranperempuan);
+                break;
+            case 6:
+                printf("terima kasih\n");
+                exit(0);
+            default:
+                printf("pilihan tidak valid!\n");
+        }
+    }
+
+    return 0;
+}
