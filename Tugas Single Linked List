@@ -1,0 +1,294 @@
+/* Akbar Pratama Witanto 23081010127 */
+
+
+#include <stdio.h>
+#include <conio.h>
+#include <stdlib.h>
+
+//========================================================
+
+struct node {
+    int data;
+    struct node *next;
+};
+typedef struct node node;
+
+
+void tambahAwal(node **head);
+void tambahAkhir(node **head);
+void tambahData(node **head);
+void hapusData(node **head, int mode);
+void cariData(node *head);
+void tranverse(node *head);
+void hitungNode(node *head);
+void jumlahkanData(node *head);
+int isEmpty(node *head);
+//========================================================
+
+int main() {
+    node *head = NULL;
+    char pilih;
+
+    do {
+        system("cls");
+        printf("Masukkan pilihan:\n");
+        printf("1. tambah data di awal\n");
+        printf("2. tambah data di tengah list\n");
+        printf("3. tambah data di akhir\n");
+        printf("4. cetak isi list\n");
+        printf("5. hapus data di awal\n");
+        printf("6. hapus data di tengah list\n");
+        printf("7. hapus data di akhir\n");
+        printf("8. cari data\n");
+        printf("9. tampilkan jumlah node\n");
+        printf("10. jumlahkan semua data\n");
+        printf("MASUKKAN PILIHAN (tekan q untuk keluar): ");
+        fflush(stdin);
+        scanf(" %c", &pilih);
+
+        switch (pilih) {
+            case '1': tambahAwal(&head); break;
+            case '2': tambahData(&head); break;
+            case '3': tambahAkhir(&head); break;
+            case '4': tranverse(head); getch(); break;
+            case '5': hapusData(&head, 1); break;
+            case '6': hapusData(&head, 2); break;
+            case '7': hapusData(&head, 3); break;
+            case '8': cariData(head); break;
+            case '9': hitungNode(head); break;
+            case '10': jumlahkanData(head); break;
+        }
+    } while (pilih != 'q'); //dibikin switch case agar lebih mudah dipahami
+
+    return 0;
+}
+
+/*node *createNode(void){
+  node *ptr;
+
+  ptr = (node *)malloc(sizeof(node));
+  return(ptr);
+}*/
+
+//========================================================
+
+void tambahAwal(node **head) {
+    int bil;
+    node *pNew = (node *)malloc(sizeof(node));
+
+    if (pNew == NULL) {
+        printf("alokasi memori gagal\n");
+        getch();
+        return;
+    }
+
+    system("cls");
+    printf("masukkan bilangan: ");
+    scanf("%d", &bil);
+
+    pNew->data = bil;
+    pNew->next = *head;
+    *head = pNew;
+}
+
+//========================================================
+
+void tambahAkhir(node **head) {
+    int bil;
+    node *pNew = (node *)malloc(sizeof(node)), *pCur;
+
+    if (pNew == NULL) {
+        printf("alokasi memori gagal\n");
+        getch();
+        return;
+    }
+
+    system("cls");
+    printf("masukkan bilangan: ");
+    scanf("%d", &bil);
+
+    pNew->data = bil;
+    pNew->next = NULL;
+
+    if (*head == NULL) {
+        *head = pNew;
+    } else {
+        pCur = *head;
+        while (pCur->next != NULL) {
+            pCur = pCur->next;
+        }
+        pCur->next = pNew;
+    }
+}
+
+//========================================================
+
+void tambahData(node **head) {
+    int pos, bil;
+    node *pNew, *pCur;
+
+    system("cls");
+    if (isEmpty(*head)) {
+        printf("list kosong, tambahkan diawal atau akhir terlebih dahulu\n");
+        getch();
+        return;
+    }
+
+    tranverse(*head);
+    printf("\nposisi penyisipan setelah data bernilai: ");
+    scanf("%d", &pos);
+    printf("masukkan bilangan: ");
+    scanf("%d", &bil);
+
+    pCur = *head;
+    while (pCur != NULL && pCur->data != pos) {
+        pCur = pCur->next;
+    }
+
+    if (pCur == NULL) {
+        printf("data %d tidak ditemukan\n", pos);
+    } else {
+        pNew = (node *)malloc(sizeof(node));
+        if (pNew != NULL) {
+            pNew->data = bil;
+            pNew->next = pCur->next;
+            pCur->next = pNew;
+        } else {
+            printf("alokasi memori gagal\n");
+        }
+    }
+    getch();
+}
+
+//========================================================
+
+void hapusData(node **head, int mode) {
+    node *pCur, *pDel;
+    int pos;
+
+    if (isEmpty(*head)) {
+        printf("list kosong!\n");
+        getch();
+        return;
+    }
+
+    if (mode == 1) {  // hapus awal
+        pDel = *head;
+        *head = (*head)->next;
+        free(pDel);
+        printf("data awal berhasil dihapus!\n");
+    } else if (mode == 3) {  // hapus akhir
+        if ((*head)->next == NULL) {
+            pDel = *head;
+            *head = NULL;
+            free(pDel);
+        } else {
+            pCur = *head;
+            while (pCur->next->next != NULL) {
+                pCur = pCur->next;
+            }
+            pDel = pCur->next;
+            pCur->next = NULL;
+            free(pDel);
+        }
+        printf("data akhir berhasil dihapus!\n");
+    } else if (mode == 2) {  // hapus tengah
+        printf("masukkan nilai data yang ingin dihapus: ");
+        scanf("%d", &pos);
+
+        pCur = *head;
+        while (pCur->next != NULL && pCur->next->data != pos) {
+            pCur = pCur->next;
+        }
+
+        if (pCur->next == NULL) {
+            printf("data %d tidak ditemukan!\n", pos);
+        } else {
+            pDel = pCur->next;
+            pCur->next = pDel->next;
+            free(pDel);
+            printf("data tengah berhasil dihapus\n");
+        }
+    }
+    getch();
+}
+
+//========================================================
+
+void cariData(node *head) {
+    int bil, found = 0;
+    node *pCur;
+
+    system("cls");
+    printf("masukkan data yang ingin dicari: ");
+    scanf("%d", &bil);
+    pCur = head;
+
+    while (pCur != NULL) {
+        if (pCur->data == bil) {
+            printf("data ditemukan: %d\n", bil);
+            found = 1;
+            break;
+        }
+        pCur = pCur->next;
+    }
+
+    if (!found) {
+        printf("data tidak ditemukan!\n");
+    }
+    getch();
+}
+
+//========================================================
+
+void tranverse(node *head) {
+    node *pWalker = head;
+
+    system("cls");
+    if (pWalker == NULL) {
+        printf("list kosong\n");
+    } else {
+        while (pWalker != NULL) {
+            printf("%d -> ", pWalker->data);
+            pWalker = pWalker->next;
+        }
+        printf("NULL\n");
+    }
+}
+
+//========================================================
+
+void hitungNode(node *head) {
+    int count = 0;
+    node *pCur = head;
+
+    while (pCur != NULL) {
+        count++;
+        pCur = pCur->next;
+    }
+
+    printf("jumlah node dalam linked list: %d\n", count);
+    getch();
+}
+
+//========================================================
+
+void jumlahkanData(node *head) {
+    int sum = 0;
+    node *pCur = head;
+
+    while (pCur != NULL) {
+        sum += pCur->data;
+        pCur = pCur->next;
+    }
+
+    printf("jumlah total dari semua data: %d\n", sum);
+    getch();
+}
+
+//========================================================
+
+int isEmpty(node *head) {
+    return head == NULL;
+}
+
